@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- 
+https://github.com/vahaduo/
+-->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Vahaduo: Global 25 Views</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+  <script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
+  <script src="global25-projection.js" defer></script>
+  <style>
+    html, body {
+      height: 100%;
+    }
+    #graphDiv {
+      min-height: calc(100% - 4rem);
+      background-color: #cccccc;
+      margin-left: 1rem;
+      margin-right: 1rem;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <form id="app">
+    <div class="input-group p-2">
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-primary" type="button" @click="resetAll">
+          Reset all
+        </button>
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+          Choose PCA
+        </button>
+        <div class="dropdown-menu">
+          <a v-once v-for="(pca, index) in pcaData" class="dropdown-item" href="#" v-on:click="plotPCA(index)">{{pca.name}}</a>
+        </div>
+        <span class="input-group-text">{{pcaData[currentPCA].name}}</span>
+      </div>
+      <input @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste Global 25 scaled coordinates here.">
+      <div class="input-group-append">
+        <button class="btn btn-outline-primary" type="button" @click="addtrace">
+          Add to PCA
+        </button>
+      </div>
+    </div>
+  </form> 
+  <div id="graphDiv"></div>
+</body>
+</html>
