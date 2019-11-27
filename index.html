@@ -28,7 +28,7 @@ https://github.com/vahaduo/
   </style>
 </head>
 <body>
-  <form id="app">
+  <form id="app" onsubmit="return false" @submit="addtrace">
     <div class="input-group p-2">
       <div class="input-group-prepend">
         <button class="btn btn-outline-primary" type="button" @click="resetAll">
