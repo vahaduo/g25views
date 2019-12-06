@@ -20,7 +20,6 @@ https://github.com/vahaduo/
     }
     #graphDiv {
       min-height: calc(100% - 4rem);
-      background-color: #cccccc;
       margin-left: 1rem;
       margin-right: 1rem;
       box-sizing: border-box;
@@ -28,12 +27,20 @@ https://github.com/vahaduo/
   </style>
 </head>
 <body>
-  <form id="app" onsubmit="return false" @submit="addtrace">
+  <form id="app" onsubmit="return false" @submit="addTrace">
     <div class="input-group p-2">
       <div class="input-group-prepend">
         <button class="btn btn-outline-primary" type="button" @click="resetAll">
           Reset all
         </button>
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+          Save
+        </button>
+        <div class="dropdown-menu">
+          <a v-once v-for="(size, index) in imageSize" class="dropdown-item btn-sm" href="#" v-on:click="saveAsImage(index)">{{size[0] + "×" + size[1] + " px"}}</a>
+        </div>
+      </div>
+      <div class="input-group-prepend">
         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
           Choose PCA
         </button>
@@ -42,9 +49,9 @@ https://github.com/vahaduo/
         </div>
         <span class="input-group-text">{{pcaData[currentPCA].name}}</span>
       </div>
-      <input @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste Global 25 scaled coordinates here.">
+      <input @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste single or multiple Global 25 scaled coordinates here.">
       <div class="input-group-append">
-        <button class="btn btn-outline-primary" type="button" @click="addtrace">
+        <button class="btn btn-outline-primary" type="button" @click="addTrace">
           Add to PCA
         </button>
       </div>
