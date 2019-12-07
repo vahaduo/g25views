@@ -767,8 +767,8 @@ var vm = new Vue({
         ],
         initialLayout: '',
         layout: {
-	  colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
-	  xaxis: { zeroline: false },
+          colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
+          xaxis: { zeroline: false },
           yaxis: { zeroline: false },
           hovermode: 'closest',
           dragmode: 'pan',
@@ -947,8 +947,8 @@ var vm = new Vue({
         ],
         initialLayout: '',
         layout: {
-	  colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
-	  xaxis: { zeroline: false },
+          colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
+          xaxis: { zeroline: false },
           yaxis: { zeroline: false },
           hovermode: 'closest',
           dragmode: 'pan',
@@ -1127,7 +1127,7 @@ var vm = new Vue({
         ],
         initialLayout: '',
         layout: {
-	  colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
+          colorway: ["#a4a4a4", "#f97850", "#57b894", "#df72b6", "#97d343", "#f6a0ce", "#deb882", "#ffba4c", "#6ea1c9", "#7b8dbf", "#6ea1c9", "#f97850", "#57b894", "#df72b6"], 
           xaxis: { zeroline: false },
           yaxis: { zeroline: false },
           hovermode: 'closest',
@@ -1811,8 +1811,14 @@ var vm = new Vue({
     },
     addTrace: function () {
       const dataset = [], traces = [], inputNames = [], currentPcaData = this.pcaData[this.currentPCA];
-      let i, input, hasNumbers = true, has26 = true, predicted, symbolId, colorId, inputArray, len, inArItemLen;
+      let i, input, hasNumbers = true, has26 = true, predicted, symbolId, colorId, join = false, joinLabel, cli, inputArray, len, inArItemLen;
       inputArray = this.inputValue.trim().replace(/\s\s+/g, ' ');
+      cli = inputArray.split('@');
+      if (cli[0] == 'join') {
+        join = true;
+        inputArray = inputArray.slice(5);
+        inputArray = inputArray.trim();
+      }
       inputArray = inputArray.split(',');
       for (i = 25, len = inputArray.length; i < len; i += 25) {
         inputArray[i] = inputArray[i].replace(/[ ]/g, '\n');
@@ -1840,13 +1846,35 @@ var vm = new Vue({
           dataset.push(inputArray[item]);
         }
         predicted = currentPcaData.mlpca.predict(dataset);
-        for (let item in predicted.data) {
+        if (join) {
           symbolId = this.pcaData[this.currentPCA].symbolId;
           colorId = this.pcaData[this.currentPCA].colorId;
-          traces.push({x: [Number((predicted.data[item][currentPcaData.x] * currentPcaData.flipX).toFixed(6))], y: [Number((predicted.data[item][currentPcaData.y] * currentPcaData.flipY).toFixed(6))], mode: 'markers', type: 'scatter', name: inputNames[item], text: [inputNames[item]],  marker: { color: this.colorList[colorId], symbol: this.markerList[symbolId][0], size: this.markerList[symbolId][1] }});
+          inputNames[0] = inputNames[0].split(';');
+          if (inputNames[0].length > 1) {
+            joinLabel = inputNames[0][0];
+            inputNames[0].shift();
+            inputNames[0] = inputNames[0].join(';');
+          } else {
+            inputNames[0] = inputNames[0][0];
+            joinLabel = inputNames[0].split(':')[0];
+          }
+          traces.push({x: [], y: [], mode: 'markers', type: 'scatter', name: joinLabel, text: [],  marker: { color: this.colorList[colorId], symbol: this.markerList[symbolId][0], size: this.markerList[symbolId][1]}});
+          for (let item in predicted.data) {
+            traces[0].x.push(Number((predicted.data[item][currentPcaData.x] * currentPcaData.flipX).toFixed(6)));
+            traces[0].y.push(Number((predicted.data[item][currentPcaData.y] * currentPcaData.flipY).toFixed(6)));
+            traces[0].text.push(inputNames[item]);
+          }
           symbolId == this.markerList.length - 1 ? this.pcaData[this.currentPCA].symbolId = 0 : this.pcaData[this.currentPCA].symbolId++;
           colorId == this.colorList.length - 1 ? this.pcaData[this.currentPCA].colorId = 0 : this.pcaData[this.currentPCA].colorId++;
-        } 
+        } else {
+          for (let item in predicted.data) {
+            symbolId = this.pcaData[this.currentPCA].symbolId;
+            colorId = this.pcaData[this.currentPCA].colorId;
+            traces.push({x: [Number((predicted.data[item][currentPcaData.x] * currentPcaData.flipX).toFixed(6))], y: [Number((predicted.data[item][currentPcaData.y] * currentPcaData.flipY).toFixed(6))], mode: 'markers', type: 'scatter', name: inputNames[item], text: [inputNames[item]],  marker: { color: this.colorList[colorId], symbol: this.markerList[symbolId][0], size: this.markerList[symbolId][1]}});
+            symbolId == this.markerList.length - 1 ? this.pcaData[this.currentPCA].symbolId = 0 : this.pcaData[this.currentPCA].symbolId++;
+            colorId == this.colorList.length - 1 ? this.pcaData[this.currentPCA].colorId = 0 : this.pcaData[this.currentPCA].colorId++;
+          }
+        }
         Plotly.addTraces(graphDiv, traces);
       } else {
         this.inputHasError = true;
