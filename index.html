@@ -45,7 +45,7 @@ https://github.com/vahaduo/
           Choose PCA
         </button>
         <div class="dropdown-menu">
-          <a v-once v-for="(pca, index) in pcaData" class="dropdown-item" href="#" v-on:click="plotPCA(index)">{{pca.name}}</a>
+          <a v-once v-for="(pca, index) in pcaData" class="dropdown-item" v-bind:href="'#' + pcaNames[index]">{{pca.name}}</a>
         </div>
         <span class="input-group-text">{{pcaData[currentPCA].name}}</span>
       </div>
