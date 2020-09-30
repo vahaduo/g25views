@@ -230,7 +230,7 @@ var vm = new Vue({
         ],
         initialLayout: '',
         layout: {
-          colorway: ['#bbbbbb', '#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'],
+          colorway: ['#ffba4c', '#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#deb882', '#a4a4a4', '#6ea1c9', '#f6a0ce'],
           xaxis: { zeroline: false },
           yaxis: { zeroline: false },
           hovermode: 'closest',
