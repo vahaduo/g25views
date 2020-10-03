@@ -43,11 +43,17 @@ https://github.com/vahaduo/
         </div>
       </div>
       <div class="input-group-prepend">
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
           Choose PCA
         </button>
         <div class="dropdown-menu">
-          <a v-once v-for="(pca, index) in pcaData" class="dropdown-item" v-bind:href="'#' + pcaNames[index]">{{pca.name}}</a>
+          <a v-once v-for="(pca, index) in pcaData" class="dropdown-item btn-sm" v-bind:href="'#' + pcaNames[index]">{{pca.name}}</a>
+          <div class="dropdown-divider"></div>
+          <h6 class="dropdown-header">Go to:</h6>
+          <a href="https://vahaduo.github.io/g25views/cvg/" title="Celtic vs Germanic PCA" target="_blank" class="dropdown-item btn-sm">
+          Celtic vs Germanic PCA</a>
+          <a href="https://vahaduo.github.io" title="Vahaduo App Gallery" target="_blank" class="dropdown-item btn-sm">
+          Vahaduo App Gallery</a>
         </div>
         <span class="input-group-text">{{pcaData[currentPCA].name}}</span>
       </div>
