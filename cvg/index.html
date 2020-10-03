@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+https://github.com/vahaduo/
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Two-dimensional visualization of modern and ancient human genetic variation. Project samples onto predefined regional PCAs based on Eurogenes Global 25 PCA.">
+  <title>Vahaduo: Eurogenes Celtic vs Germanic PCA</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+  <script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
+  <script src="cvg.js" defer></script>
+  <style>
+    html, body {
+      height: 100%;
+    }
+    #graphDiv {
+      min-height: calc(100% - 4rem);
+      margin-left: 1rem;
+      margin-right: 1rem;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <form id="app" onsubmit="return false" @submit="addTrace">
+    <div class="input-group p-2">
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-primary" type="button" @click="resetAll">
+          Reset all
+        </button>
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+          Save
+        </button>
+        <div class="dropdown-menu">
+          <a v-once v-for="(size, index) in imageSize" class="dropdown-item btn-sm" href="#" v-on:click="saveAsImage(index)">{{size[0] + "×" + size[1] + " px"}}</a>
+        </div>
+      </div>
+      <div class="input-group-prepend">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
+          Go to
+        </button>
+        <div class="dropdown-menu">
+          <a href="https://vahaduo.github.io/g25views/" title="Global 25 Views" target="_blank" class="dropdown-item">Global 25 Views</a>
+          <div class="dropdown-divider"></div>
+          <a href="https://vahaduo.github.io" title="Vahaduo App Gallery" target="_blank" class="dropdown-item">Vahaduo App Gallery</a>
+        </div>
+        <span class="input-group-text">Celtic vs Germanic PCA</span>
+      </div>
+      <input @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste single or multiple Celtic vs Germanic PCA coordinates here.">
+      <div class="input-group-append">
+        <button class="btn btn-outline-primary" type="button" @click="addTrace">
+          Add to PCA
+        </button>
+      </div>
+    </div>
+  </form> 
+  <div id="graphDiv"></div>
+</body>
+</html>
