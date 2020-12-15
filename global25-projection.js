@@ -11,8 +11,298 @@ var vm = new Vue({
     currentHash: null,
     baseTitle: document.title,
     markerList: [[0, 10], [13, 11], [14, 11], [15, 11]],
-    colorList: ['#166f4e', '#da0017', '#5619a4', '#de0077', '#569918', '#6f6317', '#9824d9', '#535353', '#2b57a0', '#bb5805', '#7e0061'],
-    imageSize: [[800, 400],[800, 500],[800, 600],[1200, 600],[1200, 750],[1200, 900],[1600, 800],[1600, 1000],[1600, 1200],[2000, 1000],[2000, 1250],[2000, 1500],[2400, 1200],[2400, 1500],[2400, 1800]],
+    colorList: ['#166f4e', '#da0017', '#5619a4', '#de0077', '#569918', '#9824d9', '#6f6317', '#535353', '#2b57a0', '#bb5805', '#7e0061'],
+    imageSize: [[800, 400],[800, 500],[800, 600],[1200, 600],[1200, 750],[1200, 900],[1600, 800],[1600, 1000],[1600, 1200],[2000, 1000],[2000, 1250],[2000, 1500],[2400, 1200],[2400, 1500],[2400, 1800],[1920,1080],[3840, 2160],[7680, 4320]],
+    scaling: 0,
+    scalingText: ['Scaled', 'Non-scaled'],
+    eigenvalues: [
+      129.557,103.13,14.222,10.433,9.471,
+      7.778,5.523,5.325,4.183,3.321,
+      2.637,2.246,2.21,1.894,1.842,
+      1.758,1.7,1.605,1.58,1.564,
+      1.557,1.529,1.519,1.452,1.434
+    ],
+    addGroupLabels: true,
+    addConvexHulls: true,
+    addToSub: 0,
+    addMode: 0,
+    addModeText: ['Aggregated', 'Individual', 'As one group'],
+    customName: '',
+    options: {
+      edits: {
+          annotationTail: true
+      },
+      showSendToCloud: false,
+      responsive: true,
+      toImageButtonOptions: {
+        format: 'png',
+        filename: 'Vahaduo: Global 25 Views'
+      },
+      modeBarButtonsToRemove: ['hoverClosestCartesian', 'hoverCompareCartesian'],
+      modeBarButtonsToAdd: [
+        {
+          name: 'Add subtitle',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 1.5000004,2 C 0.6715733,2 3.9999857e-7,2.6715729 3.9999857e-7,3.5 v 9 C 3.9999857e-7,13.328427 0.6715733,14 1.5000004,14 H 14.5 c 0.828427,0 1.500001,-0.671573 1.5,-1.5 v -9 C 16,2.6715729 15.328427,2 14.5,2 Z m 0,1 H 14.5 C 14.776142,3 15,3.2238576 15,3.5 v 9 C 15,12.776142 14.776142,13 14.5,13 H 1.5000004 c -0.2761424,0 -0.5,-0.223858 -0.5,-0.5 v -9 c 0,-0.2761424 0.2238576,-0.5 0.5,-0.5 z m 2,2 a 0.5,0.5 0 0 0 -0.5,0.5 v 1 a 0.5,0.5 0 0 0 0.5,0.5 H 12.5 A 0.5,0.5 0 0 0 13,6.5 v -1 A 0.5,0.5 0 0 0 12.5,5 Z m 0,3 a 0.5,0.5 0 0 0 -0.5,0.5 0.5,0.5 0 0 0 0.5,0.5 H 12.5 a 0.5,0.5 0 0 0 0,-1 z m 0,2 a 0.5,0.5 0 0 0 -0.5,0.5 0.5,0.5 0 0 0 0.5,0.5 h 6 a 0.5,0.5 0 0 0 0,-1 z'},
+          click: function(gd) {
+            let subtitle = prompt("Please enter subtitle");
+            if (subtitle != null) {
+              Plotly.relayout(gd, {title: (vm.pcaData[vm.currentPCA].layout.title.text.split('<br>'))[0] + '<br><span style="font-size: 15px">' + subtitle.trim().replace(/\;/g,"&#59;").replace(/\"/g,"&#34;").replace(/\'/g,"&#39;").replace(/\</g, "&lt;").replace(/\>/g, "&gt;") + '</span>'});
+            } else {
+              Plotly.relayout(gd, {title: (vm.pcaData[vm.currentPCA].layout.title.text.split('<br>'))[0]});
+            }
+          }
+        },
+        {
+          name: 'Toggle legend: full / projected only / base PCA only / none',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 2 1 C 0.8954305 1 0 1.8954305 0 3 L 0 13 C 0 14.104569 0.8954305 15 2 15 L 14 15 C 15.104569 15 16 14.104569 16 13 L 16 3 C 16 1.8954305 15.104569 1 14 1 L 2 1 z M 2 2 L 14 2 C 14.552285 2 15 2.4477153 15 3 L 15 13 C 15 13.552285 14.552285 14 14 14 L 2 14 C 1.4477153 14 1 13.552285 1 13 L 1 3 C 1 2.4477153 1.4477153 2 2 2 z M 10 3 C 9.4477153 3 9 3.4477153 9 4 L 9 12 C 9 12.552285 9.4477153 13 10 13 L 12 13 C 12.552285 13 13 12.552285 13 12 L 13 4 C 13 3.4477153 12.552285 3 12 3 L 10 3 z '},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            currentPCAdata.hideLegend = (currentPCAdata.hideLegend == 3 ? 0 : currentPCAdata.hideLegend + 1);
+            if (currentPCAdata.hideLegend == 0) {
+              currentPCAdata.layout.showlegend = true;
+              for (let i = 0; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].showlegend = true;
+              }
+            } else if (currentPCAdata.hideLegend == 1) {
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].showlegend = false;
+              }
+            } else if (currentPCAdata.hideLegend == 2) {
+              for (let i = 0; i < currentPCAdata.traces.length; i++) {
+                if (i < currentPCAdata.tracesCount) {
+                  currentPCAdata.traces[i].showlegend = true;
+                } else {
+                  currentPCAdata.traces[i].showlegend = false;
+                }
+              }
+            } else {
+              currentPCAdata.layout.showlegend = false;
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle base PCA visibility: show / hide',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 8.0058594,1.5 C 7.9221385,1.4991094 7.8395343,1.5192568 7.765625,1.5585938 l -7.5,4 c -0.35351617,0.1880985 -0.35351617,0.6947139 0,0.8828124 L 3.1875,8 0.26367188,9.5585938 c -0.35351592,0.1880985 -0.35351592,0.6947132 0,0.8828122 l 7.50000002,4 c 0.1470893,0.07847 0.3236138,0.07847 0.4707031,0 l 7.5,-4 c 0.353516,-0.188099 0.353516,-0.6947137 0,-0.8828122 L 12.8125,8 15.734375,6.4414062 c 0.353516,-0.1880985 0.353516,-0.6947139 0,-0.8828124 l -7.5,-4 C 8.163967,1.5211153 8.0856145,1.5010249 8.0058594,1.5 Z M 8,2.5664062 14.4375,6 8,9.4335938 1.5625,6 Z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA], visibility = true;
+            for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+              if (currentPCAdata.traces[i].visible === true) {
+                visibility = 'legendonly';
+                break;
+              }
+            }  
+            for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+              currentPCAdata.traces[i].visible = visibility;
+            }        
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle hover info: all / projected only',
+          icon: Plotly.Icons.tooltip_basic,
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+              if (currentPCAdata.traces[i].hoverinfo == 'text+name') {
+                currentPCAdata.traces[i].hoverinfo = 'skip';
+              } else {
+                currentPCAdata.traces[i].hoverinfo = 'text+name';
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle base PCA color scheme: color / gray',
+          icon: { 'width': 16, 'height': 16, 'path': 'M7.21.8C7.69.295 8 0 8 0c.109.363.234.708.371 1.038.812 1.946 2.073 3.35 3.197 4.6C12.878 7.096 14 8.345 14 10a6 6 0 0 1-12 0C2 6.668 5.58 2.517 7.21.8zm.413 1.021A31.25 31.25 0 0 0 5.794 3.99c-.726.95-1.436 2.008-1.96 3.07C3.304 8.133 3 9.138 3 10c0 0 2.5 1.5 5 .5s5-.5 5-.5c0-1.201-.796-2.157-2.181-3.7l-.03-.032C9.75 5.11 8.5 3.72 7.623 1.82z M4.553 7.776c.82-1.641 1.717-2.753 2.093-3.13l.708.708c-.29.29-1.128 1.311-1.907 2.87l-.894-.448z'},
+          click: function(gd) {
+            let currentLayout = vm.pcaData[vm.currentPCA].layout;
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            if (currentLayout.colorway.length == 1) {
+              currentPCAdata.layout.colorway = currentLayout.defaultColorway;
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].textfont = {size: 9, color: currentPCAdata.traces[i].defaultTextColor};
+              }
+              vm.plotPCA(vm.currentPCA);
+            } else {
+              currentPCAdata.layout.colorway = ['#d4d4d4'];
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].textfont = {size: 9, color: '#d0d0d0'};
+              }
+              vm.plotPCA(vm.currentPCA);
+            }
+          }
+        },
+        {
+          name: 'Toggle base PCA labels: none / full name / group name / ID',
+          icon: { 'width': 16, 'height': 16, 'path': 'M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            currentPCAdata.basePCAlabels = (currentPCAdata.basePCAlabels == 3 ? 0 : currentPCAdata.basePCAlabels + 1);
+            if (currentPCAdata.basePCAlabels == 0) {
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textFull;
+                currentPCAdata.traces[i].mode = 'markers';
+              }
+            } else if (currentPCAdata.basePCAlabels == 1) {
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].mode = 'markers+text';
+              }
+            } else if (currentPCAdata.basePCAlabels == 2) {
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textGroup;
+              }
+            } else {
+              for (let i = 0; i < currentPCAdata.tracesCount; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textID;
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle projected marker size: big / medium / small',
+          icon: { 'width': 100, 'height': 100, 'path': 'M 49.998047 3.2382812 C 24.204158 3.2382812 3.2324219 24.208076 3.2324219 50.001953 C 3.2324219 75.146956 23.164074 95.698177 48.0625 96.716797 C 48.26953 96.72746 48.479599 96.727128 48.6875 96.734375 C 48.688147 96.734408 48.688806 96.734342 48.689453 96.734375 C 49.125292 96.746428 49.559338 96.767578 49.998047 96.767578 C 50.437759 96.767578 50.871765 96.746483 51.308594 96.734375 C 51.516051 96.727136 51.725049 96.727437 51.931641 96.716797 C 76.83024 95.698371 96.761719 75.147084 96.761719 50.001953 C 96.761719 24.208076 75.791932 3.2382812 49.998047 3.2382812 z M 49.998047 8.9082031 C 72.72802 8.9082031 91.091797 27.271988 91.091797 50.001953 C 91.091797 57.578303 89.042784 64.663978 85.480469 70.751953 C 86.597459 67.218546 87.203125 63.46006 87.203125 59.5625 C 87.203125 39.049983 70.510548 22.357422 49.998047 22.357422 C 29.485542 22.357422 12.800781 39.049983 12.800781 59.5625 C 12.800781 63.472438 13.409823 67.24197 14.533203 70.785156 C 10.958857 64.689762 8.9023437 57.592091 8.9023438 50.001953 C 8.9023438 27.271988 27.268071 8.9082031 49.998047 8.9082031 z M 49.998047 28.027344 C 67.446636 28.027344 81.533203 42.113895 81.533203 59.5625 C 81.533203 67.449206 78.648328 74.643322 73.882812 80.166016 C 74.918652 77.396074 75.486328 74.40179 75.486328 71.277344 C 75.486328 57.234547 64.040859 45.787109 49.998047 45.787109 C 35.955234 45.787109 24.515625 57.234547 24.515625 71.277344 C 24.515625 74.403997 25.084428 77.400296 26.121094 80.171875 C 21.354272 74.64843 18.46875 67.45194 18.46875 59.5625 C 18.46875 42.113895 32.549454 28.027344 49.998047 28.027344 z M 49.998047 51.457031 C 60.976943 51.457031 69.818359 60.298459 69.818359 71.277344 C 69.818359 81.909839 61.524722 90.538424 51.029297 91.072266 C 51.026691 91.072398 51.02409 91.072134 51.021484 91.072266 C 51.020835 91.072286 51.020181 91.072245 51.019531 91.072266 C 50.678858 91.080567 50.340752 91.097656 49.998047 91.097656 C 49.655003 91.097656 49.315617 91.080584 48.974609 91.072266 C 48.970715 91.072142 48.966785 91.072391 48.962891 91.072266 C 38.468824 90.537453 30.183594 81.909179 30.183594 71.277344 C 30.183594 60.298459 39.019147 51.457031 49.998047 51.457031 z '},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            if (currentPCAdata.markerSize < 6) {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].marker.size -= 3;
+              }
+              if (currentPCAdata.markerSize > 0) {
+                for (let item of currentPCAdata.layout.annotations) {
+                  item.arrowhead = 0;
+                }
+              }
+              currentPCAdata.markerSize +=3;
+            } else {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].marker.size += 6;
+              }
+              for (let item of currentPCAdata.layout.annotations) {
+                item.arrowhead = 6;
+              }
+              currentPCAdata.markerSize = 0;
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle projected labels: none / full name / group name / ID',
+          icon: { 'width': 16, 'height': 16, 'path': 'M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.716-.43 2.078-1.011zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            currentPCAdata.projectedLabels = (currentPCAdata.projectedLabels == 3 ? 0 : currentPCAdata.projectedLabels + 1);
+            if (currentPCAdata.projectedLabels == 0) {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textFull;
+                currentPCAdata.traces[i].mode = 'markers';
+              }
+            } else if (currentPCAdata.projectedLabels == 1) {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].mode = 'markers+text';
+              } 
+            } else if (currentPCAdata.projectedLabels == 2) {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textGroup;
+              }
+            }else {
+              for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+                currentPCAdata.traces[i].text = currentPCAdata.traces[i].textID;
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle group labels style: movable / static',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 2 0 C 1.73598 0 1.4846566 0.053539125 1.2539062 0.14648438 C 1.2337899 0.15458713 1.2131454 0.16119017 1.1933594 0.16992188 C 1.1925819 0.17026222 1.1921827 0.17153111 1.1914062 0.171875 C 1.0912768 0.21622313 0.99497713 0.26862599 0.90429688 0.328125 A 2 2 0 0 0 0.8984375 0.33203125 C 0.88979412 0.33774572 0.88159561 0.34376496 0.87304688 0.34960938 C 0.67181419 0.48718386 0.49859547 0.65936523 0.359375 0.859375 A 2 2 0 0 0 0.35742188 0.86132812 C 0.34934224 0.87296987 0.34182128 0.88466459 0.33398438 0.89648438 C 0.27517629 0.98517999 0.22396335 1.0798774 0.1796875 1.1777344 C 0.16824013 1.203035 0.15689619 1.2280574 0.14648438 1.2539062 C 0.10519102 1.3564231 0.072803857 1.464107 0.048828125 1.5742188 C 0.045961301 1.587385 0.041668571 1.6000196 0.0390625 1.6132812 C 0.038934903 1.6139052 0.03918491 1.6146083 0.0390625 1.6152344 C 0.014646239 1.7401191 0 1.8679666 0 2 L 0 10 C 0 10.26402 0.053539125 10.515343 0.14648438 10.746094 C 0.15458713 10.76621 0.16119017 10.786855 0.16992188 10.806641 C 0.17026222 10.807418 0.17153111 10.807817 0.171875 10.808594 C 0.21622313 10.908723 0.26862599 11.005023 0.328125 11.095703 A 2 2 0 0 0 0.33203125 11.101562 C 0.33774572 11.110206 0.34376496 11.118404 0.34960938 11.126953 C 0.48718386 11.328186 0.65936523 11.501404 0.859375 11.640625 A 2 2 0 0 0 0.86132812 11.642578 C 0.87296987 11.650658 0.88466459 11.658179 0.89648438 11.666016 C 0.98517999 11.724824 1.0798774 11.776037 1.1777344 11.820312 C 1.203035 11.83176 1.2280574 11.843104 1.2539062 11.853516 C 1.3564231 11.894809 1.464107 11.927196 1.5742188 11.951172 C 1.587385 11.954039 1.6000196 11.958331 1.6132812 11.960938 C 1.7387514 11.985594 1.8673033 12 2 12 L 4.5 12 A 1 1 0 0 1 4.71875 12.025391 C 4.7213388 12.025977 4.7239775 12.02674 4.7265625 12.027344 C 4.7298293 12.028107 4.733071 12.028501 4.7363281 12.029297 A 1 1 0 0 1 4.9335938 12.099609 C 4.9427875 12.104037 4.9518834 12.108574 4.9609375 12.113281 A 1 1 0 0 1 5.1386719 12.230469 A 1 1 0 0 1 5.3007812 12.400391 L 7.1992188 14.933594 C 7.2956007 15.062103 7.4171905 15.156077 7.5488281 15.222656 C 7.5580211 15.227306 7.5668653 15.231981 7.5761719 15.236328 C 7.6402447 15.26626 7.7073603 15.291025 7.7753906 15.306641 C 7.7832658 15.308448 7.7909186 15.308931 7.7988281 15.310547 C 7.9366147 15.338695 8.0773936 15.338662 8.2148438 15.308594 C 8.2172735 15.307957 8.2202519 15.309308 8.2226562 15.308594 C 8.288729 15.293599 8.3536105 15.268721 8.4160156 15.240234 C 8.416797 15.239878 8.4171843 15.238629 8.4179688 15.238281 C 8.4270704 15.234099 8.4363174 15.231033 8.4453125 15.226562 C 8.4458511 15.226301 8.4467293 15.22683 8.4472656 15.226562 C 8.5807846 15.159936 8.7032358 15.063654 8.8007812 14.933594 L 10.699219 12.400391 A 1 1 0 0 1 10.851562 12.240234 C 10.858621 12.234197 10.865834 12.228486 10.873047 12.222656 A 1 1 0 0 1 11.039062 12.113281 C 11.046837 12.109239 11.054622 12.105399 11.0625 12.101562 A 1 1 0 0 1 11.269531 12.027344 A 1 1 0 0 1 11.472656 12 A 1 1 0 0 1 11.5 12 L 14 12 C 14.26402 12 14.515343 11.946461 14.746094 11.853516 C 14.76621 11.845413 14.786855 11.83881 14.806641 11.830078 C 14.907652 11.785501 15.004288 11.731856 15.095703 11.671875 A 2 2 0 0 0 15.101562 11.667969 C 15.110206 11.662254 15.118404 11.656235 15.126953 11.650391 C 15.328186 11.512816 15.501404 11.340635 15.640625 11.140625 A 2 2 0 0 0 15.642578 11.138672 C 15.650658 11.12703 15.658179 11.115335 15.666016 11.103516 C 15.724824 11.01482 15.776037 10.920123 15.820312 10.822266 C 15.83176 10.796965 15.843104 10.771943 15.853516 10.746094 C 15.894809 10.643577 15.927196 10.535893 15.951172 10.425781 C 15.954039 10.412615 15.958331 10.39998 15.960938 10.386719 C 15.985594 10.261249 16 10.132697 16 10 L 16 2 C 16 1.73598 15.946461 1.4846566 15.853516 1.2539062 C 15.845413 1.2337899 15.83881 1.2131454 15.830078 1.1933594 C 15.785501 1.0923475 15.731856 0.99571234 15.671875 0.90429688 C 15.670582 0.90232676 15.669285 0.90038202 15.667969 0.8984375 C 15.662254 0.88979412 15.656235 0.88159561 15.650391 0.87304688 C 15.512816 0.67181419 15.340635 0.49859547 15.140625 0.359375 C 15.139877 0.35885443 15.139418 0.35794101 15.138672 0.35742188 C 15.12703 0.34934224 15.115335 0.34182128 15.103516 0.33398438 C 15.01482 0.27517629 14.920123 0.22396335 14.822266 0.1796875 C 14.796965 0.16824013 14.771943 0.15689619 14.746094 0.14648438 C 14.643577 0.10519102 14.535893 0.072803857 14.425781 0.048828125 C 14.412615 0.045961301 14.39998 0.041668571 14.386719 0.0390625 A 2 2 0 0 0 14.384766 0.0390625 C 14.259881 0.014646239 14.132033 0 14 0 L 2 0 z M 2 1 L 14 1 A 1 1 0 0 1 15 2 L 15 10 A 1 1 0 0 1 14 11 L 11.5 11 A 2 2 0 0 0 9.9003906 11.800781 L 8 14.332031 L 6.0996094 11.800781 A 2 2 0 0 0 4.5 11 L 2 11 A 1 1 0 0 1 1 10 L 1 2 A 1 1 0 0 1 2 1 z M 4.0292969 5 A 1 1 0 0 0 3 6 A 1 1 0 0 0 5 6 A 1 1 0 0 0 4.0292969 5 z M 8.0292969 5 A 1 1 0 0 0 7 6 A 1 1 0 0 0 9 6 A 1 1 0 0 0 8.0292969 5 z M 12.029297 5 A 1 1 0 0 0 11 6 A 1 1 0 0 0 13 6 A 1 1 0 0 0 12.029297 5 z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA];
+            if (currentPCAdata.arrowLabels) {
+              for (let item of currentPCAdata.layout.annotations) {
+                item.mode2();
+              }
+              currentPCAdata.arrowLabels = false;
+            } else {
+              for (let item of currentPCAdata.layout.annotations) {
+                item.mode1();
+              }
+              currentPCAdata.arrowLabels = true;
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle group labels: show for visible projected groups / hide',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 2 0 C 0.8954305 0 0 0.8954305 0 2 L 0 10 C 0 11.104569 0.8954305 12 2 12 L 4.5 12 C 4.8147573 12 5.1119268 12.148585 5.3007812 12.400391 L 7.1992188 14.933594 C 7.5992188 15.466927 8.4007813 15.466927 8.8007812 14.933594 L 10.699219 12.400391 C 10.888073 12.148585 11.185243 12 11.5 12 L 14 12 C 15.104569 12 16 11.104569 16 10 L 16 2 C 16 0.8954305 15.104569 0 14 0 L 2 0 z M 2 1 L 14 1 C 14.552285 1 15 1.4477153 15 2 L 15 10 C 15 10.552285 14.552285 11 14 11 L 11.5 11 C 10.870485 11.000307 10.277853 11.296985 9.9003906 11.800781 L 8 14.332031 L 6.0996094 11.800781 C 5.7221465 11.296985 5.1295146 11.000307 4.5 11 L 2 11 C 1.4477153 11 1 10.552285 1 10 L 1 2 C 1 1.4477153 1.4477153 1 2 1 z M 3.5 3 C 3.2238576 3 3 3.2238576 3 3.5 C 3 3.7761424 3.2238576 4 3.5 4 L 12.5 4 C 13.166666 4 13.166666 3 12.5 3 L 3.5 3 z M 3.5 5.5 C 3.2238576 5.5 3 5.7238576 3 6 C 3 6.2761424 3.2238576 6.5 3.5 6.5 L 12.5 6.5 C 13.166666 6.5 13.166666 5.5 12.5 5.5 L 3.5 5.5 z M 3.5 8 C 3.2238576 8 3 8.2238576 3 8.5 C 3 8.7761424 3.2238576 9 3.5 9 L 8.5 9 C 9.1666664 9 9.1666664 8 8.5 8 L 3.5 8 z '},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA], anyVisible = false;
+            for (let item of currentPCAdata.layout.annotations) {
+              if (item.visible == true) {
+                anyVisible = true;
+                break;
+              }
+            }
+            if (anyVisible) {
+              for (let item of currentPCAdata.layout.annotations) {
+                item.visible = false;
+              }
+            } else {
+              for (let item of currentPCAdata.layout.annotations) {
+                  if (currentPCAdata.traces[item.traceID].visible == true) {
+                    item.visible = true;
+                  }
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle convex hulls: show for visible projected groups / hide',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 8 0 L 0 6.5 L 3 16 L 13 16 L 16 6.5 L 8 0 z M 8 1.2871094 L 14.841797 6.8476562 L 12.267578 15 L 3.7324219 15 L 1.1582031 6.8476562 L 8 1.2871094 z '},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA], anyVisible = false;
+            for (let item of currentPCAdata.layout.shapes) {
+              if (item.visible == true) {
+                anyVisible = true;
+                break;
+              }
+            }
+            if (anyVisible) {
+              for (let item of currentPCAdata.layout.shapes) {
+                item.visible = false;
+              }
+            } else {
+              for (let item of currentPCAdata.layout.shapes) {
+                  if (currentPCAdata.traces[item.traceID].visible == true) {
+                    item.visible = true;
+                  }
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle projected visibility: show / hide',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 8.0058594,1.5 C 7.9221385,1.4991094 7.8395343,1.5192568 7.765625,1.5585938 l -7.5,4 c -0.35351617,0.1880985 -0.35351617,0.6947139 0,0.8828124 L 3.1875,8 0.26367188,9.5585938 c -0.35351592,0.1880985 -0.35351592,0.6947132 0,0.8828122 l 7.50000002,4 c 0.1470893,0.07847 0.3236138,0.07847 0.4707031,0 l 7.5,-4 c 0.353516,-0.188099 0.353516,-0.6947137 0,-0.8828122 L 12.8125,8 15.734375,6.4414062 c 0.353516,-0.1880985 0.353516,-0.6947139 0,-0.8828124 l -7.5,-4 C 8.163967,1.5211153 8.0856145,1.5010249 8.0058594,1.5 Z M 4.25,8.5664062 7.765625,10.441406 c 0.1465706,0.07778 0.3221794,0.07778 0.46875,0 L 11.75,8.5664062 14.4375,10 8,13.433594 1.5625,10 Z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA], visibility = true;
+            for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+              if (currentPCAdata.traces[i].visible === true) {
+                visibility = 'legendonly';
+                break;
+              }
+            }  
+            for (let i = currentPCAdata.tracesCount; i < currentPCAdata.traces.length; i++) {
+              currentPCAdata.traces[i].visible = visibility;
+            }        
+            vm.plotPCA(vm.currentPCA);
+          }
+        }
+      ]
+    },
     pcaData: [
       {
         name: 'North Europe',
@@ -132,11 +422,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 North Europe PCA'
         }
       },
@@ -230,12 +521,13 @@ var vm = new Vue({
         ],
         initialLayout: '',
         layout: {
-          colorway: ['#ffba4c', '#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#deb882', '#a4a4a4', '#6ea1c9', '#f6a0ce'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          colorway: ['#ffba4c', '#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'],
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Northwest Europe PCA'
         }
       },
@@ -411,11 +703,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#ffba4c', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce','#7b8dbf', '#f97850', '#57b894', '#df72b6'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Europe 1 PCA'
         }
       },
@@ -591,11 +884,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#ffba4c', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce','#7b8dbf', '#f97850', '#57b894', '#df72b6'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Europe 2 PCA'
         }
       },
@@ -753,11 +1047,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 West Eurasia PCA'
         }
       },
@@ -933,11 +1228,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#a4a4a4', '#f97850', '#57b894', '#df72b6', '#97d343', '#f6a0ce', '#deb882', '#ffba4c', '#6ea1c9', '#7b8dbf', '#6ea1c9', '#f97850', '#57b894', '#df72b6'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 North Eurasia 1 PCA'
         }
       },
@@ -1113,11 +1409,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#a4a4a4', '#f97850', '#57b894', '#df72b6', '#97d343', '#f6a0ce', '#deb882', '#ffba4c', '#6ea1c9', '#7b8dbf', '#6ea1c9', '#f97850', '#57b894', '#df72b6'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 North Eurasia 2 PCA'
         }
       },
@@ -1293,11 +1590,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#a4a4a4', '#f97850', '#57b894', '#df72b6', '#97d343', '#f6a0ce', '#deb882', '#ffba4c', '#6ea1c9', '#7b8dbf', '#6ea1c9', '#f97850', '#57b894', '#df72b6'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 North Eurasia 3 PCA'
         }
       },
@@ -1383,11 +1681,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Caucasus - Near East PCA'
         }
       },
@@ -1464,11 +1763,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'],
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 South Asia PCA'
         }
       },
@@ -1536,11 +1836,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 East Asia 1 PCA'
         }
       },
@@ -1608,11 +1909,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 East Asia 2 PCA'
         }
       },
@@ -1725,11 +2027,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Africa 1 PCA'
         }
       },
@@ -1842,11 +2145,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Africa 2 PCA'
         }
       },
@@ -1959,11 +2263,12 @@ var vm = new Vue({
         initialLayout: '',
         layout: {
           colorway: ['#7b8dbf', '#f97850', '#57b894', '#df72b6', '#97d343', '#a4a4a4', '#deb882', '#ffba4c', '#6ea1c9', '#f6a0ce'], 
-          xaxis: { zeroline: false },
-          yaxis: { zeroline: false },
+          xaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
+          yaxis: { spikemode: 'across', spikedash: 'dot', spikethickness: 1, spikesnap: 'data', showspikes: false, zeroline: false, tickfont: { color: '#ddd' } },
           hovermode: 'closest',
           dragmode: 'pan',
-          margin: { l: 50, t: 50, b:20 },
+          modebar: { activecolor: '#007bff' },
+          margin: { l: 50, r: 20, t: 52, b: 18 },
           title: 'Global 25 Africa 3 PCA'
         }
       }
@@ -1973,7 +2278,7 @@ var vm = new Vue({
     plotPCA: function (index) {
       this.currentPCA = index;
       document.title = this.baseTitle + ' - ' + this.pcaData[index].name;
-      Plotly.react('graphDiv', this.pcaData[index].traces , this.pcaData[index].layout, {showSendToCloud: false, responsive: true});
+      Plotly.react('graphDiv', this.pcaData[index].traces , this.pcaData[index].layout, this.options);
     },
     hashToIndex: function () {
       for (let item in this.pcaNames) {
@@ -1991,94 +2296,331 @@ var vm = new Vue({
         this.plotPCA(index);
       }
     },
-    addTrace: function () {
-      const dataset = [], traces = [], inputNames = [], currentPcaData = this.pcaData[this.currentPCA];
-      let i, input, hasNumbers = true, has26 = true, predicted, symbolId, colorId, join = false, joinLabel, cli, inputArray, len, inArItemLen;
-      inputArray = this.inputValue.trim().replace(/\s\s+/g, ' ');
-      cli = inputArray.split('@');
-      if (cli[0] == 'join') {
-        join = true;
-        inputArray = inputArray.slice(5);
-        inputArray = inputArray.trim();
+    validateCoordinates: function (array, dimensions) {
+      let dimensionsPlusOne = dimensions + 1;
+      for (let item of array) {
+        if (item.length != dimensionsPlusOne) {return false;}
+        for (let i = 1; i < dimensionsPlusOne; i++) {
+          if (isNaN(item[i])) {return false;}
+        }
       }
+      return true;
+    },
+    namesOut: function (arr) {
+      let names = [];
+      for (let i = 0, n = arr.length; i < n; i++) {
+        names.push(arr[i].shift());
+      }
+      return names;
+    },
+    namesIn: function (arr, names) {
+      for (let i = 0, n = arr.length; i < n; i++) {
+        arr[i].unshift(names[i]);
+        arr[i].unshift(names[i].split(':').pop());
+        arr[i].unshift(names[i].split(':').shift());
+      }
+    },
+    aggregate: function (arr) {
+      let sortedArr = arr.slice(), aggregatedArr = [];
+      sortedArr.sort(function(a, b) {
+        return a[0].localeCompare(b[0]);
+      });
+      for (let name = null, i = 0, j = -1, n = sortedArr.length; i < n; i++) {
+        if (sortedArr[i][0] != name) {
+          j++;
+          name = sortedArr[i][0];
+          aggregatedArr.push([]);
+        }
+        aggregatedArr[j].push(sortedArr[i]);
+      }
+      return aggregatedArr;
+    },
+    getMarker: function () {
+      let currentPCAdata = this.pcaData[this.currentPCA],
+        marker = {
+          symbol: this.markerList[currentPCAdata.symbolId][0],
+          size: this.markerList[currentPCAdata.symbolId][1] - currentPCAdata.markerSize,
+          color: this.colorList[currentPCAdata.colorId]
+        };
+      currentPCAdata.symbolId++;
+      if (currentPCAdata.symbolId == this.markerList.length ) {
+        currentPCAdata.symbolId = 0;
+      }
+      currentPCAdata.colorId++;
+      if (currentPCAdata.colorId == this.colorList.length ) {
+        currentPCAdata.colorId = 0;
+      }
+      return marker;
+    },
+    getColumn: function (arr, col) {
+      let column = [];
+      for (let item of arr) {
+        column.push(item[col]);
+      }
+      return column;
+    },
+    getAverage: function (arr) {
+      function arrSum (total, num) {
+        return total + num;
+      }
+      return arr.reduce(arrSum) / arr.length;
+    },
+    newTrace: function (points, name) {
+      let marker = this.getMarker(),
+        currentPCAdata = this.pcaData[this.currentPCA];
+      let newTrace = {
+        visible: true,
+        x: this.getColumn(points, 3),
+        y: this.getColumn(points, 4),
+        text: [],
+        hovertext: [],
+        textFull: this.getColumn(points, 2),
+        textID: this.getColumn(points, 1),
+        textGroup: this.getColumn(points, 0),
+        hoverinfo: 'text+name',
+        textposition: 'top center',
+        textfont: { size: 9, color: marker.color },
+        mode: (currentPCAdata.projectedLabels ? 'markers+text' : 'markers'),
+        type: 'scatter',
+        name: name,
+        marker: {
+          opacity: 0.8,
+          color: marker.color,
+          symbol: marker.symbol,
+          size: marker.size
+        }
+      }
+      if (currentPCAdata.projectedLabels < 2) {
+        newTrace.text = newTrace.textFull;
+      } else if (currentPCAdata.projectedLabels == 2) {
+        newTrace.text = newTrace.textGroup;
+      } else {
+        newTrace.text = newTrace.textID;
+      } 
+      newTrace.hovertext = newTrace.textFull;
+      return newTrace;
+    },
+    newAnnotation: function (points, name, color) {
+      let currentPCAdata = this.pcaData[this.currentPCA];
+      let newAnnotation = {
+        x: this.getAverage(this.getColumn(points, 3)),
+        y: this.getAverage(this.getColumn(points, 4)),
+        text: name,
+        textangle: 0,
+        ax: 0,
+        ay: (points.length > 1 ? 0 : -27),
+        font: {
+          color: color,
+        },
+        arrowcolor: color + 'aa',
+        arrowside: 'end+start',
+        arrowsize: 1,
+        startarrowsize: 1,
+        arrowwidth: 1,
+        arrowhead: (currentPCAdata.markerSize < 6 ? 6 : 0),
+        startarrowhead: 0,
+        standoff: 0,
+        startstandoff: 0,
+        borderpad: 0,
+        bordercolor: 'rgba(255,255,255,1)',
+        visible: true,
+        traceID: currentPCAdata.traces.length,
+        mode1: function () {
+          this.showarrow = true,
+          this.borderwidth = 1,
+          this.bgcolor = 'rgba(255,255,255,0.75)',
+          this.font.size = 11
+        },
+        mode2: function () {
+          this.showarrow = false,
+          this.borderwidth = 0,
+          this.bgcolor = 'rgba(0,0,0,0)',
+          this.font.size = 9
+        }
+      }
+      if (currentPCAdata.arrowLabels) {
+        newAnnotation.mode1();
+      } else {
+        newAnnotation.mode2();
+      }
+      return newAnnotation;
+    },
+    newShape: function (points, color) {
+      if (points.length == 2) {
+        let newShape = {
+          type: 'line',
+          xref: 'x',
+          yref: 'y',
+          x0: points[0][3],
+          y0: points[0][4],
+          x1: points[1][3],
+          y1: points[1][4],
+          line: {
+            color: color,
+            width: 2
+          },
+          opacity: 0.2,
+          visible: true,
+          traceID: this.pcaData[this.currentPCA].traces.length
+        }
+        return newShape;
+      } else {
+        let coordinates = [], convexHull, newShape;
+        for (let item of points) {
+          coordinates.push([item[3], item[4]]);
+        }
+        convexHull = d3.polygonHull(coordinates);
+        for (let item of convexHull) {
+          item = item.join(',');
+        }
+        convexHull = convexHull.join(' L');
+        convexHull = 'M ' + convexHull + ' Z';
+        newShape = {
+          type: 'path',
+          path: convexHull,
+          fillcolor: (color + '30'),
+          line: {
+            color: (color + '45'),
+            width: 1
+          },
+          opacity: 0.9,
+          visible: true,
+          traceID: this.pcaData[this.currentPCA].traces.length
+        }
+        return newShape;
+      }
+    },
+    addToPlot: function () {
+      let inputArray = this.inputValue, currentPCAdata = this.pcaData[this.currentPCA],
+        predicted, inputNames;
       inputArray = inputArray.split(',');
-      for (i = 25, len = inputArray.length; i < len; i += 25) {
+      for (let i = 25, len = inputArray.length; i < len; i += 25) {
         inputArray[i] = inputArray[i].replace(/[ ]/g, '\n');
       }
-      inputArray = inputArray.join(',').split('\n');
+      inputArray = inputArray
+        .join(',')
+        .replace(/[<>\/\\\"\';\`]/g, '')
+        .replace(/[^\S\r\n]+/g, '')
+        .replace(/join@/g, '')
+        .replace(/\n\n+/g, '\n')
+        .trim()
+        .split('\n');
       for (let item in inputArray) {
-        inputArray[item] = inputArray[item].replace(/[^\S]/g, '').replace(/\'/g,'').replace(/\</g, '&lt;').replace(/\>/g, '&gt;');
         inputArray[item] = inputArray[item].split(',');
-        inArItemLen = inputArray[item].length;
-        if (inArItemLen != 26) {
-          has26 = false;
-        } else {
-          for (i = 1; i < inArItemLen; i++) {
-            inputArray[item][i] = Number(inputArray[item][i]);
-            if (isNaN(inputArray[item][i])) {
-              hasNumbers = false;
+        for (let item2 in inputArray[item]) {
+          if (item2 != 0) { inputArray[item][item2] = Number(inputArray[item][item2]) }
+        }
+      }
+      if (!this.validateCoordinates(inputArray, 25)) {
+        this.inputHasError = true;
+        return;
+      }
+      if (this.scaling) {
+        for (let item in inputArray) {
+          for (let item2 in inputArray[item]) {
+            if (item2 != 0) {inputArray[item][item2] = Number((inputArray[item][item2] * this.eigenvalues[item2 - 1]).toFixed(6)) }
+          }
+        }
+      }
+      inputNames = this.namesOut(inputArray);
+      predicted = currentPCAdata.mlpca.predict(inputArray);
+      for (let item in predicted.data) {
+        inputArray[item] = [
+          Number((predicted.data[item][currentPCAdata.x] * currentPCAdata.flipX).toFixed(6)),
+          Number((predicted.data[item][currentPCAdata.y] * currentPCAdata.flipY).toFixed(6))
+        ];
+      }
+      this.namesIn(inputArray, inputNames);
+      if (this.addMode == 0) {
+        let aggregated = this.aggregate(inputArray), currentTrace;
+        for (let item of aggregated) {
+          currentTrace = this.newTrace(item, item[0][0]);
+          if (this.addGroupLabels) {
+            currentPCAdata.layout.annotations.push(
+              this.newAnnotation(item, item[0][0], currentTrace.marker.color)
+            )
+          }
+          if (this.addConvexHulls && item.length > 1) {
+            currentPCAdata.layout.shapes.push(
+              this.newShape(item, currentTrace.marker.color)
+            )
+          }
+          currentPCAdata.traces.push(currentTrace);
+        }
+      } else if (this.addMode == 1) {
+        let currentTrace, currentAnnotation;
+        for (let item of inputArray) {
+          currentTrace = this.newTrace([item], item[2]);
+          if (this.addGroupLabels) {
+            currentPCAdata.layout.annotations.push(
+              this.newAnnotation([item], item[2], currentTrace.marker.color)
+            )
+          }
+          currentPCAdata.traces.push(currentTrace);
+        }
+      } else {
+        let traceName = (this.customName.length > 0 ? this.customName : inputArray[0][0]),
+          currentTrace = this.newTrace(inputArray, traceName);
+        if (this.addGroupLabels) {
+          if (this.addToSub) {
+            for (let item of this.aggregate(inputArray)) {
+              currentPCAdata.layout.annotations.push(
+                this.newAnnotation(item, item[0][0], currentTrace.marker.color)
+              )
+            }
+          } else {
+            currentPCAdata.layout.annotations.push(
+              this.newAnnotation(inputArray, traceName, currentTrace.marker.color)
+            )
+          }
+        }
+        if (this.addConvexHulls) {
+          if (this.addToSub) {
+            for (let item of this.aggregate(inputArray)) {
+              if (item.length > 1) {
+                currentPCAdata.layout.shapes.push(
+                  this.newShape(item, currentTrace.marker.color)
+                )
+              }
+            }
+          } else {
+            if (inputArray.length > 1) {
+              currentPCAdata.layout.shapes.push(
+                this.newShape(inputArray, currentTrace.marker.color)
+              )
             }
           }
         }
+        currentPCAdata.traces.push(currentTrace);
       }
-      if (has26 && hasNumbers) {
-        for (let item in inputArray) {
-          inputNames.push(inputArray[item][0]);
-          inputArray[item].shift();
-          dataset.push(inputArray[item]);
-        }
-        predicted = currentPcaData.mlpca.predict(dataset);
-        if (join) {
-          symbolId = this.pcaData[this.currentPCA].symbolId;
-          colorId = this.pcaData[this.currentPCA].colorId;
-          inputNames[0] = inputNames[0].split(';');
-          if (inputNames[0].length > 1) {
-            joinLabel = inputNames[0][0];
-            inputNames[0].shift();
-            inputNames[0] = inputNames[0].join(';');
-          } else {
-            inputNames[0] = inputNames[0][0];
-            joinLabel = inputNames[0].split(':')[0];
-          }
-          traces.push({x: [], y: [], mode: 'markers', type: 'scatter', name: joinLabel, text: [],  marker: { color: this.colorList[colorId], symbol: this.markerList[symbolId][0], size: this.markerList[symbolId][1]}});
-          for (let item in predicted.data) {
-            traces[0].x.push(Number((predicted.data[item][currentPcaData.x] * currentPcaData.flipX).toFixed(6)));
-            traces[0].y.push(Number((predicted.data[item][currentPcaData.y] * currentPcaData.flipY).toFixed(6)));
-            traces[0].text.push(inputNames[item]);
-          }
-          symbolId == this.markerList.length - 1 ? this.pcaData[this.currentPCA].symbolId = 0 : this.pcaData[this.currentPCA].symbolId++;
-          colorId == this.colorList.length - 1 ? this.pcaData[this.currentPCA].colorId = 0 : this.pcaData[this.currentPCA].colorId++;
-        } else {
-          for (let item in predicted.data) {
-            symbolId = this.pcaData[this.currentPCA].symbolId;
-            colorId = this.pcaData[this.currentPCA].colorId;
-            traces.push({x: [Number((predicted.data[item][currentPcaData.x] * currentPcaData.flipX).toFixed(6))], y: [Number((predicted.data[item][currentPcaData.y] * currentPcaData.flipY).toFixed(6))], mode: 'markers', type: 'scatter', name: inputNames[item], text: [inputNames[item]],  marker: { color: this.colorList[colorId], symbol: this.markerList[symbolId][0], size: this.markerList[symbolId][1]}});
-            symbolId == this.markerList.length - 1 ? this.pcaData[this.currentPCA].symbolId = 0 : this.pcaData[this.currentPCA].symbolId++;
-            colorId == this.colorList.length - 1 ? this.pcaData[this.currentPCA].colorId = 0 : this.pcaData[this.currentPCA].colorId++;
-          }
-        }
-        Plotly.addTraces(graphDiv, traces);
-      } else {
-        this.inputHasError = true;
-      };
+      this.plotPCA(this.currentPCA);
     },
-    resetAll: function () {
-      for (let item of this.pcaData) {
-        item.traces = item.traces.slice(0, item.tracesCount);
-        item.layout = JSON.parse(item.initialLayout);
-        item.symbolId = 0;
-        item.colorId = 0;
-        for (let trace of item.traces) {
-          delete trace.visible;
-          delete trace.selectedpoints;
-        }
+    resetPlot: function () {
+      this.inputHasError = false;
+      let item = this.pcaData[this.currentPCA];
+      item.traces = item.traces.slice(0, item.tracesCount);
+      item.layout = JSON.parse(item.initialLayout);
+      item.symbolId = 0;
+      item.colorId = 0;
+      item.basePCAlabels = 0;
+      item.arrowLabels = true;
+      item.projectedLabels = 0;
+      item.hideLegend = 0;
+      item.markerSize = 0;
+      for (let trace of item.traces) {
+        trace.mode = 'markers';
+        trace.hoverinfo = 'text+name';
+        trace.text = trace.textFull;
+        trace.textfont.color = trace.defaultTextColor;
+        trace.visible = true;
+        delete trace.showlegend;
+        delete trace.selectedpoints;
       }
-      this.inputValue = '';
       Plotly.purge('graphDiv');
       this.hashToPlot();
     },
     saveAsImage: function (index) {
-      Plotly.downloadImage('graphDiv', {format: 'png', width: this.imageSize[index][0], height: this.imageSize[index][1], filename: 'Vahaduo ' + this.pcaData[this.currentPCA].layout.title.text})
+      Plotly.downloadImage('graphDiv', {format: 'png', width: this.imageSize[index][0], height: this.imageSize[index][1], filename: 'Vahaduo ' + this.pcaData[this.currentPCA].layout.title.text.replace(/\<br\>/, ' ').replace(/(<([^>]+)>)/ig, '')})
     }
   },
   created: function () {
@@ -2091,7 +2633,35 @@ var vm = new Vue({
       }
     }
     for (let item of this.pcaData) {
+      for (let item2 of item.traces) {
+        item2.visible = true;
+        item2.textposition = 'top center';
+        item2.textfont = {size: 9};
+        item2.hoverinfo = 'text+name';
+        item2.textFull = item2.text;
+        item2.hovertext = item2.textFull;
+        item2.textID = item2.text.slice();
+        for (let item3 in item2.textID) {
+          item2.textID[item3] = item2.textID[item3].split(':').pop();
+        }
+        item2.textGroup = item2.text.slice();
+        for (let item3 in item2.textGroup) {
+          item2.textGroup[item3] = item2.textGroup[item3].split(':').shift();
+        }
+      }
+      for (let item2 in item.traces) {
+        item.traces[item2].defaultTextColor = item.layout.colorway[item2 % item.layout.colorway.length];
+        item.traces[item2].textfont.color = item.traces[item2].defaultTextColor;
+      }
+      item.basePCAlabels = 0;
+      item.arrowLabels = true;
+      item.projectedLabels = 0;
+      item.hideLegend = 0;
+      item.markerSize = 0;
       item.tracesCount = item.traces.length;
+      item.layout.defaultColorway = item.layout.colorway;
+      item.layout.annotations = [];
+      item.layout.shapes = [];
       item.initialLayout = JSON.stringify(item.layout);
       item.mlpca = new ML.PCA(dummyCoordinates);
       item.mlpca.S = item.mlpcaS;
@@ -2108,6 +2678,9 @@ var vm = new Vue({
     window.addEventListener('hashchange', function() {
       vm.currentHash = window.location.hash.replace(/^\#/g, '');
     }, false);
+    for (let item in this.eigenvalues) {
+      this.eigenvalues[item] = Math.sqrt(this.eigenvalues[item]);
+    }
   },
   watch: {
     currentHash: function() {
