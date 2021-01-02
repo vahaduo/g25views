@@ -24,6 +24,7 @@ var vm = new Vue({
     ],
     addGroupLabels: true,
     addConvexHulls: true,
+    addRegressionLines: true,
     addToSub: 0,
     addMode: 0,
     addModeText: ['Aggregated', 'Individual', 'As one group'],
@@ -265,18 +266,43 @@ var vm = new Vue({
           click: function(gd) {
             let currentPCAdata = vm.pcaData[vm.currentPCA], anyVisible = false;
             for (let item of currentPCAdata.layout.shapes) {
-              if (item.visible == true) {
+              if (item.role == 'convex' && item.visible == true) {
                 anyVisible = true;
                 break;
               }
             }
             if (anyVisible) {
               for (let item of currentPCAdata.layout.shapes) {
-                item.visible = false;
+                if (item.role == 'convex') item.visible = false;
               }
             } else {
               for (let item of currentPCAdata.layout.shapes) {
-                  if (currentPCAdata.traces[item.traceID].visible == true) {
+                  if (item.role == 'convex' && currentPCAdata.traces[item.traceID].visible == true) {
+                    item.visible = true;
+                  }
+              }
+            }
+            vm.plotPCA(vm.currentPCA);
+          }
+        },
+        {
+          name: 'Toggle regression lines: show for visible projected groups / hide',
+          icon: { 'width': 16, 'height': 16, 'path': 'M 2 0 C 1.73598 0 1.4846566 0.053539125 1.2539062 0.14648438 C 1.2337899 0.15458713 1.2131454 0.16119017 1.1933594 0.16992188 C 1.1925819 0.17026222 1.1921827 0.17153111 1.1914062 0.171875 C 1.0912768 0.21622313 0.99497713 0.26862599 0.90429688 0.328125 A 2 2 0 0 0 0.8984375 0.33203125 C 0.88979412 0.33774572 0.88159561 0.34376496 0.87304688 0.34960938 C 0.67181419 0.48718386 0.49859547 0.65936523 0.359375 0.859375 A 2 2 0 0 0 0.35742188 0.86132812 C 0.34934224 0.87296987 0.34182128 0.88466459 0.33398438 0.89648438 C 0.27517629 0.98517999 0.22396335 1.0798774 0.1796875 1.1777344 C 0.16824013 1.203035 0.15689619 1.2280574 0.14648438 1.2539062 C 0.10519102 1.3564231 0.072803857 1.464107 0.048828125 1.5742188 C 0.045961301 1.587385 0.041668571 1.6000196 0.0390625 1.6132812 C 0.038934903 1.6139052 0.03918491 1.6146083 0.0390625 1.6152344 C 0.014646239 1.7401191 0 1.8679666 0 2 L 0 14 C 0 14.26402 0.053539125 14.515343 0.14648438 14.746094 C 0.15458713 14.76621 0.16119017 14.786855 0.16992188 14.806641 C 0.17026222 14.807418 0.17153111 14.807817 0.171875 14.808594 C 0.21622313 14.908723 0.26862599 15.005023 0.328125 15.095703 A 2 2 0 0 0 0.33203125 15.101562 C 0.33774572 15.110206 0.34376496 15.118404 0.34960938 15.126953 C 0.48718386 15.328186 0.65936523 15.501404 0.859375 15.640625 A 2 2 0 0 0 0.86132812 15.642578 C 0.87296987 15.650658 0.88466459 15.658179 0.89648438 15.666016 C 0.98517999 15.724824 1.0798774 15.776037 1.1777344 15.820312 C 1.203035 15.83176 1.2280574 15.843104 1.2539062 15.853516 C 1.3564231 15.894809 1.464107 15.927196 1.5742188 15.951172 C 1.587385 15.954039 1.6000196 15.958331 1.6132812 15.960938 C 1.7387514 15.985594 1.8673033 16 2 16 L 14 16 C 14.26402 16 14.515343 15.946461 14.746094 15.853516 C 14.76621 15.845413 14.786855 15.83881 14.806641 15.830078 C 14.907652 15.785501 15.004288 15.731856 15.095703 15.671875 A 2 2 0 0 0 15.101562 15.667969 C 15.110206 15.662254 15.118404 15.656235 15.126953 15.650391 C 15.328186 15.512816 15.501404 15.340635 15.640625 15.140625 A 2 2 0 0 0 15.642578 15.138672 C 15.650658 15.12703 15.658179 15.115335 15.666016 15.103516 C 15.724824 15.01482 15.776037 14.920123 15.820312 14.822266 C 15.83176 14.796965 15.843104 14.771943 15.853516 14.746094 C 15.894809 14.643577 15.927196 14.535893 15.951172 14.425781 C 15.954039 14.412615 15.958331 14.39998 15.960938 14.386719 C 15.985594 14.261249 16 14.132697 16 14 L 16 2 C 16 1.73598 15.946461 1.4846566 15.853516 1.2539062 C 15.845413 1.2337899 15.83881 1.2131454 15.830078 1.1933594 C 15.785501 1.0923475 15.731856 0.99571234 15.671875 0.90429688 A 2 2 0 0 0 15.667969 0.8984375 C 15.662254 0.88979412 15.656235 0.88159561 15.650391 0.87304688 C 15.512816 0.67181419 15.340635 0.49859547 15.140625 0.359375 A 2 2 0 0 0 15.138672 0.35742188 C 15.12703 0.34934224 15.115335 0.34182128 15.103516 0.33398438 C 15.01482 0.27517629 14.920123 0.22396335 14.822266 0.1796875 C 14.796965 0.16824013 14.771943 0.15689619 14.746094 0.14648438 C 14.643577 0.10519102 14.535893 0.072803857 14.425781 0.048828125 C 14.412615 0.045961301 14.39998 0.041668571 14.386719 0.0390625 A 2 2 0 0 0 14.384766 0.0390625 C 14.259881 0.014646239 14.132033 0 14 0 L 2 0 z M 2 1 L 14 1 A 1 1 0 0 1 15 2 L 15 14 A 1 1 0 0 1 14 15 L 2 15 A 1 1 0 0 1 1 14 L 1 2 A 1 1 0 0 1 2 1 z M 11.005859 4.5 A 0.5 0.5 0 0 0 10.646484 4.6464844 L 4.6464844 10.646484 A 0.5006316 0.5006316 0 0 0 5.3535156 11.353516 L 11.353516 5.3535156 A 0.5 0.5 0 0 0 11.353516 4.6464844 A 0.5 0.5 0 0 0 11.005859 4.5 z'},
+          click: function(gd) {
+            let currentPCAdata = vm.pcaData[vm.currentPCA], anyVisible = false;
+            for (let item of currentPCAdata.layout.shapes) {
+              if (item.role == 'regression' && item.visible == true) {
+                anyVisible = true;
+                break;
+              }
+            }
+            if (anyVisible) {
+              for (let item of currentPCAdata.layout.shapes) {
+                if (item.role == 'regression') item.visible = false;
+              }
+            } else {
+              for (let item of currentPCAdata.layout.shapes) {
+                  if (item.role == 'regression' && currentPCAdata.traces[item.traceID].visible == true) {
                     item.visible = true;
                   }
               }
@@ -2448,6 +2474,7 @@ var vm = new Vue({
     newShape: function (points, color) {
       if (points.length == 2) {
         let newShape = {
+          role: 'convex',
           type: 'line',
           xref: 'x',
           yref: 'y',
@@ -2476,6 +2503,7 @@ var vm = new Vue({
         convexHull = convexHull.join(' L');
         convexHull = 'M ' + convexHull + ' Z';
         newShape = {
+          role: 'convex',
           type: 'path',
           path: convexHull,
           fillcolor: (color + '30'),
@@ -2489,6 +2517,33 @@ var vm = new Vue({
         }
         return newShape;
       }
+    },
+    newRegressionLine: function (points, color) {
+      let coordinates = [], regPoints, reg, newShape;
+      for (let item of points) {
+        coordinates.push([item[3], item[4]]);
+      }
+      reg = d3.regressionLinear();
+      regPoints = reg(coordinates)
+      newShape = {
+        role: 'regression',
+        type: 'line',
+        xref: 'x',
+        yref: 'y',
+        x0: regPoints[0][0],
+        y0: regPoints[0][1],
+        x1: regPoints[1][0],
+        y1: regPoints[1][1],
+        line: {
+          color: color,
+          width: 2,
+          dash: 'dot'
+        },
+        opacity: 0.5,
+        visible: true,
+        traceID: this.pcaData[this.currentPCA].traces.length
+      }
+      return newShape;
     },
     addToPlot: function () {
       let inputArray = this.inputValue, currentPCAdata = this.pcaData[this.currentPCA],
@@ -2545,6 +2600,11 @@ var vm = new Vue({
               this.newShape(item, currentTrace.marker.color)
             )
           }
+          if (this.addRegressionLines && item.length > 1) {
+            currentPCAdata.layout.shapes.push(
+              this.newRegressionLine(item, currentTrace.marker.color)
+            )
+          }
           currentPCAdata.traces.push(currentTrace);
         }
       } else if (this.addMode == 1) {
@@ -2587,6 +2647,23 @@ var vm = new Vue({
             if (inputArray.length > 1) {
               currentPCAdata.layout.shapes.push(
                 this.newShape(inputArray, currentTrace.marker.color)
+              )
+            }
+          }
+        }
+        if (this.addRegressionLines) {
+          if (this.addToSub) {
+            for (let item of this.aggregate(inputArray)) {
+              if (item.length > 1) {
+                currentPCAdata.layout.shapes.push(
+                  this.newRegressionLine(item, currentTrace.marker.color)
+                )
+              }
+            }
+          } else {
+            if (inputArray.length > 1) {
+              currentPCAdata.layout.shapes.push(
+                this.newRegressionLine(inputArray, currentTrace.marker.color)
               )
             }
           }

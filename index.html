@@ -15,6 +15,7 @@ https://github.com/vahaduo/
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
   <script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
   <script src="https://d3js.org/d3-polygon.v2.min.js"></script>
+  <script src="https://unpkg.com/d3-regression@1.3.4/dist/d3-regression.min.js"></script>
   <script src="global25-projection.js" defer></script>
   <style>
     html, body {
@@ -98,12 +99,16 @@ https://github.com/vahaduo/
         </button>
         <div class="dropdown-menu py-2 px-3" @click.stop="">
           <div class="custom-control form-control-sm custom-switch">
+            <input type="checkbox" class="custom-control-input" id="addGroupLabels" v-model="addGroupLabels">
+            <label class="custom-control-label" for="addGroupLabels">Add group labels</label>
+          </div>
+          <div class="custom-control form-control-sm custom-switch">
             <input type="checkbox" class="custom-control-input" id="addConvexHulls" v-model="addConvexHulls">
             <label class="custom-control-label" for="addConvexHulls">Add convex hulls</label>
           </div>
           <div class="custom-control form-control-sm custom-switch">
-            <input type="checkbox" class="custom-control-input" id="addGroupLabels" v-model="addGroupLabels">
-            <label class="custom-control-label" for="addGroupLabels">Add group labels</label>
+            <input type="checkbox" class="custom-control-input" id="addRegressionLines" v-model="addRegressionLines">
+            <label class="custom-control-label" for="addRegressionLines">Add regression lines</label>
           </div>
           <div v-bind:class="[{ 'd-none': addMode!=2 }]">
             <h6 class="dropdown-header ml-2">&nbsp;Add to:</h6>
