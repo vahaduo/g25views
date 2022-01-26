@@ -37,14 +37,14 @@ https://github.com/vahaduo/
     input {
       min-width: 10em !important;
     }
-    .form-control {
+    #coordsInput.form-control {
       padding-right: 1.5rem !important;
     }
     #clearInput {
       margin-left: -20px;
       z-index: 10;
     }
-    .form-control.is-invalid {
+    #coordsInput.form-control.is-invalid {
       background-position: right calc(1.5em + .1875rem) center !important;
       padding-right: calc(2.5em + .75rem) !important;
     }
@@ -83,7 +83,7 @@ https://github.com/vahaduo/
           Dataset
         </button>
       </div>
-      <input v-on:keyup.enter="addToPlot" @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste single or multiple Eurogenes Celto-Germanic PCA coordinates here." spellcheck="false">
+      <input id="coordsInput" v-on:keyup.enter="addToPlot" @input="inputHasError ? inputHasError=false : null" v-model.trim="inputValue" type="text" v-bind:class="[{ 'is-invalid': inputHasError }, 'form-control']" placeholder="Paste single or multiple Eurogenes Celto-Germanic PCA coordinates here." spellcheck="false">
 <!--       <div class="input-group-append">
          <button type="button" class="btn  btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
           {{scalingText[scaling]}}
