@@ -14,7 +14,7 @@ https://github.com/vahaduo/
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF" crossorigin="anonymous"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
-  <!-- <script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script> -->
+  <script src="https://www.lactame.com/lib/ml/4.0.0/ml.min.js"></script>
   <script src="https://d3js.org/d3-polygon.v2.min.js"></script>
   <script src="https://unpkg.com/d3-regression@1.3.4/dist/d3-regression.min.js"></script>
   <script src="cvg-coords.js"></script>
@@ -71,7 +71,6 @@ https://github.com/vahaduo/
         <div class="dropdown-menu">
           <a v-once v-for="(pca, index) in pcaData" class="dropdown-item btn-sm" v-bind:href="'#' + pcaNames[index]">{{pca.name}}</a>
           <div class="dropdown-divider"></div>
-          <h6 class="dropdown-header">Go to:</h6>
           <a href="https://vahaduo.github.io/g25views/" title="Global 25 Views" target="_blank" class="dropdown-item btn-sm">
           Global 25 Views</a>
           <a href="https://vahaduo.github.io" title="Vahaduo App Gallery" target="_blank" class="dropdown-item btn-sm">
@@ -150,7 +149,7 @@ https://github.com/vahaduo/
       </div>
       <div class="input-group-append">
         <button class="btn btn-outline-primary" type="button" @click="addToPlot">
-          Add to PCA
+          {{addrun}} PCA
         </button>
       </div>
     </div>

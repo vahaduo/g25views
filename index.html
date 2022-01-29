@@ -70,7 +70,7 @@ https://github.com/vahaduo/
         <div class="dropdown-menu">
           <a v-once v-for="(pca, index) in pcaData" class="dropdown-item btn-sm" v-bind:href="'#' + pcaNames[index]">{{pca.name}}</a>
           <div class="dropdown-divider"></div>
-          <h6 class="dropdown-header">Go to:</h6>
+          <!-- <h6 class="dropdown-header">Go to:</h6> -->
           <a href="https://vahaduo.github.io/g25views/cvg/" title="Celto-Germanic PCA" target="_blank" class="dropdown-item btn-sm">
           Celto-Germanic PCA</a>
           <a href="https://vahaduo.github.io" title="Vahaduo App Gallery" target="_blank" class="dropdown-item btn-sm">
@@ -141,7 +141,7 @@ https://github.com/vahaduo/
       </div>
       <div class="input-group-append">
         <button class="btn btn-outline-primary" type="button" @click="addToPlot">
-          Add to PCA
+          {{addrun}} PCA
         </button>
       </div>
     </div>
